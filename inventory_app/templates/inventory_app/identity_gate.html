@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mystery Shop - Entrance</title>
+    <style>
+        body {
+    /* 1. Link the cave entrance image from your static directory */
+    background-image: url("{% static 'images/cave_entrance.jpg' %}");
+    background-size: cover;          /* Ensures it cleanly fills the whole screen */
+    background-position: center;     /* Centers the cavern mouth beautifully */
+    background-repeat: no-repeat;
+    background-attachment: fixed;    /* Prevents the image from jittering if there's scrolling */
+    min-height: 100vh;
+
+    /* Keep or match your existing typography values */
+    color: #b5a492;
+    font-family: 'Georgia', serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+        /* SCREEN 1: TAP TO ENTER THRESHOLD */
+        #intro-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #050403;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: opacity 1s ease-in-out, visibility 1s;
+        }
+
+        .torch-glow {
+            font-size: 26px;
+            color: #9c2a22;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px rgba(156, 42, 34, 0.6);
+            animation: flicker 3s infinite alternate;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .prompt-text {
+            font-size: 14px;
+            color: #6e5a4f;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        /* SCREEN 2: THE IRON LEDGER FORM */
+        #ledger-screen {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in-out;
+            background-color: #120e0c;
+            border: 1px solid #3d1411;
+            padding: 40px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 10px 30px rgba(0,0,0,0.7);
+            text-align: center;
+        }
+
+        h2 {
+            color: #9c2a22;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        p {
+            font-size: 13px;
+            color: #8c7b6c;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8c7b6c;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background-color: #080605;
+            border: 1px solid #291e1b;
+            color: #ded0c1;
+            font-family: 'Georgia', serif;
+            box-sizing: border-box;
+            border-radius: 2px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #9c2a22;
+        }
+
+        .submit-btn {
+            background-color: #1a0807;
+            border: 1px solid #541612;
+            color: #ba9d93;
+            width: 100%;
+            padding: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #9c2a22;
+            color: #080605;
+            box-shadow: 0 0 12px rgba(156, 42, 34, 0.6);
+        }
+
+        /* CINEMATIC ANIMATIONS */
+        @keyframes flicker {
+            0%, 100% { text-shadow: 0 0 15px rgba(156, 42, 34, 0.6); opacity: 0.9; }
+            50% { text-shadow: 0 0 25px rgba(212, 50, 39, 0.9); opacity: 1; }
+            75% { text-shadow: 0 0 12px rgba(156, 42, 34, 0.4); opacity: 0.8; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen" onclick="revealLedger()">
+        <div class="torch-glow">A mysterious merchant awaits in the shadows...</div>
+        <div class="prompt-text">[ Tap to step inside ]</div>
+    </div>
+
+    <div id="ledger-screen">
+        <h2>The Merchant's Ledger</h2>
+        <p>State your identity to gain access to the armaments.</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">Character Name</label>
+                <input type="text" id="name" name="character_name" placeholder="e.g. Elidon Stark" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+    <label for="class">Select Calling / Class</label>
+    <select id="class" name="character_class">
+        {% for c in available_classes %}
+            <option value="{{ c.class_name }}">{{ c.class_name }}</option>
+        {% empty %}
+            <option value="Wanderer">Wanderer (No classes found)</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="gold">Request Starting Allowance (10 - 1000gp)</label>
+    <input type="number" id="gold" name="starting_gold" min="10" max="1000" placeholder="e.g. 250" required>
+</div>
+
+<button type="submit" class="submit-btn">Sign the Ledger</button>
+        </form>
+    </div>
+
+    <script>
+        function revealLedger() {
+            const intro = document.getElementById('intro-screen');
+            const ledger = document.getElementById('ledger-screen');
+
+            // Fade out the intro screen
+            intro.style.opacity = '0';
+            intro.style.visibility = 'hidden';
+
+            // Smoothly fade in the identity ledger card
+            setTimeout(() => {
+                ledger.style.visibility = 'visible';
+                ledger.style.opacity = '1';
+            }, 500); // Waits for intro fade mid-point to make entry perfect
+        }
+    </script>
+
+</body>
+</html>

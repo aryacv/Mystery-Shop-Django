@@ -1,0 +1,272 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mystery Shop - Catalog</title>
+    <style>
+        body {
+    /* Pulls your new environment image from your static directory */
+    background-image: url("{% static 'images/catalog_bg.jpg' %}");
+    background-size: cover;        /* Stretches it cleanly to fit your monitor width */
+    background-position: top center; /* Centers the faint torch bloom behind Malakai */
+    background-repeat: no-repeat;
+    background-attachment: fixed;  /* Keeps the stone wall locked solid while items scroll over it */
+    min-height: 100vh;
+    
+    color: #b5a492;            
+    font-family: 'Georgia', serif;
+    margin: 0;
+    padding: 20px;
+}
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 2. THE IRON-FORGED MERCHANT BANNER (UPDATED CONTAINER) */
+        .character-bar {
+            background-color: #120e0c; /* Deep shadowed slate */
+            border: 1px solid #3d1411;  /* Dried crimson rust border */
+            border-radius: 4px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 40px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.6);
+        }
+
+        /* NEW: MERCHANT PORTRAIT STYLING */
+        .merchant-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid #9c2a22;
+            object-fit: cover;
+            box-shadow: 0 0 15px rgba(156, 42, 34, 0.4);
+        }
+
+        .merchant-dialogue {
+            flex-grow: 1;
+        }
+
+        .whisper {
+            font-style: italic;
+            color: #ded0c1;
+            font-size: 15px;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .stat-item {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #8c7b6c;
+        }
+
+        .stat-value {
+            color: #b83227; /* Gory Crimson Red for Key Stats */
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(184, 50, 39, 0.3);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #9c2a22; /* Blood-stone Crimson */
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            font-size: 22px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* 3. THE SKELETAL ITEM GRID */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        /* The Grimdark Relic Box */
+        /* The Grimdark Relic Box */
+    .item-card {
+    /* Slight opacity lets the background ash glow peek through the card edges */
+    background-color: rgba(15, 11, 9, 0.85); 
+    border: 1px solid #231917;  /* Slightly darker weathered outline */
+    border-radius: 4px;
+    padding: 22px;
+    text-align: center;
+    backdrop-filter: blur(4px); /* Modern frosted-glass effect for the mist */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.85); /* Heavier drop shadow */
+}
+        /* Ambient Blood-Glow when hovering over items */
+        .item-card:hover {
+            border-color: #9c2a22;
+            box-shadow: 0 0 20px rgba(156, 42, 34, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .item-title {
+            font-size: 17px;
+            color: #ded0c1; /* Bone white */
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+        }
+
+        .item-cost {
+            color: #b83227; /* Crimson price tag */
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        /* 4. THE FORGED IRON EXECUTION BUTTON */
+        .buy-btn {
+            background-color: #1a0807; /* Dark clotted red hue */
+            border: 1px solid #541612;
+            color: #ba9d93;
+            padding: 12px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            width: 100%;
+            border-radius: 2px;
+        }
+
+        .buy-btn:hover {
+            background-color: #9c2a22; /* Lights up like a burning ember */
+            color: #080605;
+            box-shadow: 0 0 12px rgba(156, 42, 34, 0.6);
+        }
+    </style>
+</head>
+<script>
+        function activateLoadingState(formElement) {
+            // Find the button inside the specific form that was clicked
+            const submitBtn = formElement.querySelector('.buy-btn');
+            const btnText = formElement.querySelector('.btn-text');
+            
+            if (submitBtn && btnText) {
+                // 1. Change text to fit the grimdark theme
+                btnText.innerHTML = "Claiming Relic...";
+                
+                // 2. Visual cue: Dim the button slightly to look like it's processing
+                submitBtn.style.backgroundColor = "#0b0403";
+                submitBtn.style.color = "#6e5a4f";
+                submitBtn.style.borderColor = "#291e1b";
+                submitBtn.style.cursor = "wait";
+                
+                // 3. Prevent the user from spam clicking the button while loading
+                submitBtn.style.pointerEvents = "none";
+            }
+        }
+    </script>
+<body>
+
+    <div class="container">
+        
+        <div class="character-bar">
+            <img src="{% static 'images/merchant.jpg' %}" alt="Malakai the Merchant" class="merchant-avatar">
+            
+            <div class="merchant-dialogue">
+                <p class="whisper">"Ah, a {{ request.session.character_class }} approaches... Choose your armaments wisely, {{ request.session.character_name }}."</p>
+                
+                <div class="stats-row">
+                    <div class="stat-item">Identity: <span class="stat-value">{{ request.session.character_name }}</span></div>
+                    <div class="stat-item">Class: <span class="stat-value">{{ request.session.character_class }}</span></div>
+                    <div class="stat-item">Gold Pouch: <span class="stat-value">{{ request.session.starting_gold }}gp</span></div>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <a href="/vault/" style="color: #d4af37; text-decoration: none; font-size: 12px; border: 1px solid #d4af37; padding: 6px 12px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Open Vault</a>
+                <a href="{% url 'leave_shop' %}" style="color: #ff4d4d; text-decoration: none; font-size: 12px; border: 1px solid #ff4d4d; padding: 6px 12px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Leave Shop</a>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div style="margin-bottom: 25px;">
+                {% for message in messages %}
+                    
+                    {% if message.tags == 'error' %}
+                        <div style="padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; background-color: #5c1d16; color: #ff9999; border: 1px solid #ff4d4d;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; background-color: #1b381b; color: #99ff99; border: 1px solid #4dff4d;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                    
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <h2>Available Resources & Armaments</h2>
+
+        <div class="item-grid">
+            
+            {% for item in items %}
+            <div class="item-card">
+                <div>
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 2px; margin-bottom: 15px; border: 1px solid #291e1b;">
+                    {% else %}
+                        <img src="{% static 'images/torch.jpg' %}" alt="Fallback Artwork" style="width: 100%; height: 160px; object-fit: cover; border-radius: 2px; margin-bottom: 15px; border: 1px solid #291e1b;">
+                    {% endif %}
+                    
+                    <h3 class="item-title">{{ item.name }}</h3>
+                    <div class="item-cost">Cost: {{ item.cost }} gp</div>
+                    <div style="font-size: 12px; color: #6e5a4f; margin-bottom: 15px;">
+                        In Stock: {{ item.stock }} available
+                    </div>
+                </div>
+                
+                <form method="POST" onsubmit="activateLoadingState(this)">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    
+                    {% if item.stock > 0 %}
+                        <button type="submit" class="buy-btn">
+                            <span class="btn-text">Acquire Item</span>
+                        </button>
+                    {% else %}
+                        <button class="buy-btn" style="border-color: #291e1b; color: #523a34; cursor: not-allowed;" disabled>Sold Out</button>
+                    {% endif %}
+                </form>
+
+            </div>
+            {% empty %}
+            <p style="grid-column: 1/-1; text-align: center; color: #6e5a4f;">
+                The merchant shelves are currently bare...
+            </p>
+            {% endfor %}
+
+        </div> 
+    </div> 
+</body>
+</html>
